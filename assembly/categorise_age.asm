@@ -5,7 +5,7 @@
 _start: mov     eax, 4          ; write system call
         mov     ebx, 1          ; output to stdout
         mov     ecx, msg        ; move address of msg into ecx register
-        mov     edx, msglen        ; move number of characters in message into edx register
+        mov     edx, msglen     ; move number of characters in message into edx register
         int     0x80            ; interrupts the CPU to allow the kernel to process system call
 
         mov     eax, 3          ; system read
@@ -36,15 +36,52 @@ _loop:  movzx   eax, byte [esi] ; moves the byte at esi into eax
         jmp     _loop
         
 _end_loop:
-        jmp     _exit
 
+_compare:
+        cmp     ecx, 19
+        jl      _invalid_input
+        cmp     ecx, 42
+        jg      _invalid_input
+        
+        cmp     ecx, 25
+        jbe     _young_adult
+        
+        cmp     ecx, 35
+        jbe     _adult
+        
+        jmp     _mature_adult
+        
+_young_adult:
+        mov     eax, 4          ; write system call
+        mov     ebx, 1          ; output to stdout
+        mov     ecx, msg_young        ; move address of msg into ecx register
+        mov     edx, msgylen     ; move number of characters in message into edx register
+        int     0x80
+        jmp     _exit
+       
+_adult:
+        mov     eax, 4          ; write system call
+        mov     ebx, 1          ; output to stdout
+        mov     ecx, msg_adult       ; move address of msg into ecx register
+        mov     edx, msgalen     ; move number of characters in message into edx register
+        int     0x80
+        jmp     _exit
+       
+_mature_adult:
+        mov     eax, 4          ; write system call
+        mov     ebx, 1          ; output to stdout
+        mov     ecx, msg_mature       ; move address of msg into ecx register
+        mov     edx, msgmlen     ; move number of characters in message into edx register
+        int     0x80
+        jmp     _exit
+       
 _invalid_input:
         mov     eax, 4
         mov     ebx, 1
         mov     ecx, err
         mov     edx, errlen
         int     0x80
-        
+         
 _exit:  mov     eax, 1          ; system exit
         int     0x80
 
@@ -53,6 +90,14 @@ msg:    db      "Enter age:"    ; stores the message
 msglen: equ     $ - msg         ; length of message
 err:    db      "Invalid input"
 errlen: equ     $ - err
+
+
+msg_young:      db "Life Stage: Young Adult (19-25)", 10, 0
+msgylen:        equ     $ - msg_young
+msg_adult:      db "Life Stage: Adult (26-35)", 10, 0
+msgalen:        equ     $ - msg_adult
+msg_mature:     db "Life Stage: Mature Adult (36-42)", 10, 0
+msgmlen:        equ     $ - msg_mature
 
         section .bss
 age:    resb    4               ; reserve memory for age
