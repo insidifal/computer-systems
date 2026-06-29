@@ -1,7 +1,6 @@
 ; 32-bit Linux assembly
         global  _start
-        extern printf
-
+        
         section .text
 _start: mov     eax, [total_students]
         sub     eax, [pg_students]      ; answer is in the accumulator eax
@@ -15,7 +14,7 @@ _loop:  ; convert to ASCII
         div     ecx         ; eax divide by ecx
         
         add     dl, '0'     ; lowest byte of edx convert to ASCII
-        mov     edi, dl     ; store ASCII in buffer
+        mov     [edi], dl   ; store ASCII in buffer
         dec     edi         ; point to next position in buffer
         
         test    eax, eax    ; check equals 0
@@ -33,6 +32,7 @@ _print: mov     eax, 4          ; write system call
         mov     ebx, 1          ; output to stdout
         mov     ecx, edi        ; start of the ASCII answer
         mov     edx, buffer_end ; end of the ASCII answer
+        sub     edx, edi        ; edx = buffer_end - start (calculates exact character count)
         int     0x80            ; interrupts the CPU to allow the kernel to process system call
         
 _exit:  mov     eax, 1          ; system exit
